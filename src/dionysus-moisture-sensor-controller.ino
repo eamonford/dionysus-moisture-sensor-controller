@@ -1,5 +1,14 @@
+#include "MQTT.h"
+
+
 const int AirValue = 3385;
 const int WaterValue = 1750;
+
+
+byte mqttHost[] = { 192,168,86,100 };
+MQTT mqttClient(mqttHost, 1883, mqttCallback);
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {}
 
 void setup() {
     pinMode(A0, INPUT);
@@ -10,6 +19,8 @@ void setup() {
     digitalWrite(A2, LOW);
 
     Particle.function("read", takeReading);
+
+    mqttClient.connect("sparkclient");
 }
 
 int sample() {
@@ -38,4 +49,10 @@ int takeReading(String samples) {
     return (int)average;
 }
 
-void loop() {}
+void loop() {
+  if (mqttClient.isConnected()) {
+    String jsonString = "{\"device_id\":\"" + System.deviceID() + "\",\"value\": " + String(takeReading("")) + "}";
+    mqttClient.publish("dionysus/moisture", jsonString);
+  }
+  System.sleep(SLEEP_MODE_DEEP,600);
+}
