@@ -54,5 +54,7 @@ void loop() {
     String jsonString = "{\"device_id\":\"" + System.deviceID() + "\",\"value\": " + String(takeReading("")) + "}";
     mqttClient.publish("dionysus/moisture", jsonString);
     System.sleep(SLEEP_MODE_DEEP,600);
+  } else {
+    mqttClient.connect("sparkclient");
   }
 }
