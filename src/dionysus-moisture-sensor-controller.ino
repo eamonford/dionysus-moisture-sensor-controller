@@ -1,5 +1,5 @@
 #include "MQTT.h"
-
+#include "PowerShield.h"
 
 const int AirValue = 3385;
 const int WaterValue = 1750;
@@ -7,10 +7,14 @@ const int WaterValue = 1750;
 
 byte mqttHost[] = { 192,168,86,100 };
 MQTT mqttClient(mqttHost, 1883, mqttCallback);
+PowerShield batteryMonitor;
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {}
 
 void setup() {
+    batteryMonitor.begin();
+    batteryMonitor.quickStart();
+
     pinMode(A0, INPUT);
     pinMode(A1, OUTPUT);
     pinMode(A2, OUTPUT);
@@ -51,7 +55,11 @@ int takeReading(String samples) {
 
 void loop() {
   if (mqttClient.isConnected()) {
-    String jsonString = "{\"device_id\":\"" + System.deviceID() + "\",\"value\": " + String(takeReading("")) + "}";
+    String jsonString = "{\"device_id\":\"" + System.deviceID() +
+                        "\",\"value\": " + String(takeReading("")) +
+                        "\",\"battery\": " + String(batteryMonitor.getSoC()) +
+                        "}";
+
     mqttClient.publish("dionysus/moisture", jsonString);
     System.sleep(SLEEP_MODE_DEEP,600);
   } else {
