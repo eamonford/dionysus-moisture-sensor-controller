@@ -57,7 +57,7 @@ void loop() {
   if (mqttClient.isConnected()) {
     String jsonString = "{\"device_id\":\"" + System.deviceID() +
                         "\",\"value\": " + String(takeReading("")) +
-                        "\",\"battery\": " + String(batteryMonitor.getSoC()) +
+                        ",\"battery\": " + String(batteryMonitor.getSoC()) +
                         "}";
 
     mqttClient.publish("dionysus/moisture", jsonString);
