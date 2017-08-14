@@ -1,6 +1,8 @@
 #include "MQTT.h"
 #include "PowerShield.h"
 
+#define MINUTES_BETWEEN_WAKES 30
+
 const int AirValue = 3385;
 const int WaterValue = 1750;
 
@@ -61,7 +63,7 @@ void loop() {
                         "}";
 
     mqttClient.publish("dionysus/moisture", jsonString);
-    System.sleep(SLEEP_MODE_DEEP,600);
+    System.sleep(SLEEP_MODE_DEEP,60*MINUTES_BETWEEN_WAKES);
   } else {
     mqttClient.connect("sparkclient");
   }
