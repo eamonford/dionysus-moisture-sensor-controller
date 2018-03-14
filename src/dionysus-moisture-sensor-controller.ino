@@ -57,12 +57,12 @@ int takeReading(String samples) {
 
 void loop() {
   if (mqttClient.isConnected()) {
-    String jsonString = "{\"device_id\":\"" + System.deviceID() +
+    String jsonString = "{\"deviceId\":\"" + System.deviceID() +
                         "\",\"value\": " + String(takeReading("")) +
                         ",\"battery\": " + String(batteryMonitor.getSoC()) +
                         "}";
 
-    mqttClient.publish("dionysus/moisture", jsonString);
+    mqttClient.publish("dionysus/readings", jsonString);
     System.sleep(SLEEP_MODE_DEEP,60*MINUTES_BETWEEN_WAKES);
   } else {
     mqttClient.connect("sparkclient");
