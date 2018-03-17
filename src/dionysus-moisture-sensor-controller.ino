@@ -2,10 +2,10 @@
 #include "PowerShield.h"
 
 #define MINUTES_BETWEEN_WAKES 30
+#define READINGS_TOPIC "dionysus/readings"
 
 const int AirValue = 3385;
 const int WaterValue = 1750;
-
 
 byte mqttHost[] = { 192,168,86,100 };
 MQTT mqttClient(mqttHost, 1883, mqttCallback);
@@ -24,9 +24,7 @@ void setup() {
     digitalWrite(A1, HIGH);
     digitalWrite(A2, LOW);
 
-    Particle.function("read", takeReading);
-
-    mqttClient.connect("sparkclient");
+    mqttClient.connect(System.deviceID());
 }
 
 int sample() {
@@ -41,12 +39,7 @@ int sample() {
     return 100 - percentage;
 }
 
-int takeReading(String samples) {
-    int numSamples = 10;
-    int parsed = atoi(samples);
-    if (parsed > 0) {
-        numSamples = parsed;
-    }
+int takeReading(int numSamples) {
     float average = 0;
     for (int i = 0; i < numSamples; i++) {
         average += (float)sample() / numSamples;
@@ -56,15 +49,11 @@ int takeReading(String samples) {
 }
 
 void loop() {
-  if (mqttClient.isConnected()) {
     String jsonString = "{\"deviceId\":\"" + System.deviceID() +
-                        "\",\"value\": " + String(takeReading("")) +
+                        "\",\"value\": " + String(takeReading(10)) +
                         ",\"battery\": " + String(batteryMonitor.getSoC()) +
                         "}";
-
-    mqttClient.publish("dionysus/readings", jsonString);
+    mqttClient.publish(READINGS_TOPIC, jsonString);
+    delay(1000);
     System.sleep(SLEEP_MODE_DEEP,60*MINUTES_BETWEEN_WAKES);
-  } else {
-    mqttClient.connect("sparkclient");
-  }
 }
